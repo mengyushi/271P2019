@@ -110,32 +110,23 @@ class BTSolver:
     #     return ({}, False)
     def norvigCheck ( self ):
         assigned = {}
-        # (1) if a variable is assigned, then eliminate that value from the square's neighbors
-        for v in self.network.variables:
-            if v.isAssigned():
-                for v2 in self.network.getNeighborsOfVariable(v):
-                    if v.getAssignment() == v2.getAssignment():
-                        return (assigned, False)
-                    if v.getAssignment() in v2.getValues():
-                        self.trail.push(v2)
-                        v2.removeValueFromDomain(v.getAssignment())
-                    if v2.size() == 0:
-                        return (assigned, False)
+        if not self.forwardChecking():return (assigned, False)
+        for i in self.network.getConstraints():
+            a={}
+            for j in i.vars:
+                for q in j.getValues():
+                    if q not in a:
+                        a[q]=1
+                    else:
+                        a[q]+=1
+            for j in i.vars:
+                for q in j.getValues():
+                    if a[q]==1 and not j.isAssigned():
+                        self.trail.push(j)
+                        j.assignValue(q)
 
-        # (2) if a constraint has only one possible place for a value then put the value there.
-        for constraint in self.network.getConstraints(): #for each unit in {rows, cols, blocks}
-            counter = [0 for i in range(self.gameboard.N)]
-            for i in range(self.gameboard.N):
-                for value in constraint.vars[i].getValues():
-                    counter[value-1] += 1
-            for i in range(self.gameboard.N):
-                if counter[i] == 1:
-                    for var in constraint.vars:
-                        if var.getDomain().contains(i+1):
-                            self.trail.push(var)
-                            var.assignValue(i+1)
-            
-        return (assigned, self.assignmentsCheck())
+        if not self.forwardChecking():return (assigned, False)
+        return (assigned, True)
 
     """
          Optional TODO: Implement your own advanced Constraint Propagation
