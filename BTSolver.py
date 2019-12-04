@@ -108,9 +108,12 @@ class BTSolver:
     """
     # def norvigCheck ( self ):
     #     return ({}, False)
+
     def norvigCheck ( self ):
         assigned = {}
-        if not self.forwardChecking():return (assigned, False)
+        if not self.forwardChecking():
+            return (assigned, False)
+
         for i in self.network.getConstraints():
             a={}
             for j in i.vars:
@@ -124,8 +127,10 @@ class BTSolver:
                     if a[q]==1 and not j.isAssigned():
                         self.trail.push(j)
                         j.assignValue(q)
+                        assigned[j] = q
 
-        if not self.forwardChecking():return (assigned, False)
+        if not self.forwardChecking():
+            return ({}, False)
         return (assigned, True)
 
     """
