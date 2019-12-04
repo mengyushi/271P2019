@@ -211,10 +211,12 @@ class BTSolver:
 
     def MRVwithTieBreaker(self):
         temp = self.getfirstUnassignedVariable()
+        res = [temp]
 
         for v in self.network.getVariables():
             if (v.isAssigned() == False and v.size() < temp.size()):
                 temp = v
+                res = [temp]
             elif (v.isAssigned() == False and v.size() == temp.size()):
                 neighborsOfV = self.network.getNeighborsOfVariable(v)
                 degreeOfV = sum([1 for i in neighborsOfV if not i.isAssigned()])
@@ -223,8 +225,11 @@ class BTSolver:
 
                 if (degreeOfV > degreeOftemp):
                     temp = v
+                    res = [temp]
+                elif (degreeOfV == degreeOftemp):
+                    res.append(v)
 
-        return [temp]
+        return res
 
     # test_MAD92 (test_MAD.Test_MAD) (0.0/1.0)
     # Test Failed: (1, 6) not found in [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)] : Variable returned is incorrect. Returned (1, 6). Should be [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)].
