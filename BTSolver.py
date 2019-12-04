@@ -109,18 +109,18 @@ class BTSolver:
     # def norvigCheck ( self ):
     #     return ({}, False)
     def norvigCheck ( self ):
-
+        assigned = {}
         # (1) if a variable is assigned, then eliminate that value from the square's neighbors
         for v in self.network.variables:
             if v.isAssigned():
                 for v2 in self.network.getNeighborsOfVariable(v):
                     if v.getAssignment() == v2.getAssignment():
-                        return ({}, self.assignmentsCheck())
+                        return (assigned, False)
                     if v.getAssignment() in v2.getValues():
                         self.trail.push(v2)
                         v2.removeValueFromDomain(v.getAssignment())
                     if v2.size() == 0:
-                        return ({}, self.assignmentsCheck())
+                        return (assigned, False)
 
         # (2) if a constraint has only one possible place for a value then put the value there.
         for constraint in self.network.getConstraints(): #for each unit in {rows, cols, blocks}
@@ -135,7 +135,7 @@ class BTSolver:
                             self.trail.push(var)
                             var.assignValue(i+1)
             
-        return ({}, self.assignmentsCheck())
+        return (assigned, self.assignmentsCheck())
 
     """
          Optional TODO: Implement your own advanced Constraint Propagation
@@ -229,6 +229,9 @@ class BTSolver:
                     temp = v
 
         return [temp]
+
+    # test_MAD92 (test_MAD.Test_MAD) (0.0/1.0)
+    # Test Failed: (1, 6) not found in [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)] : Variable returned is incorrect. Returned (1, 6). Should be [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)].
 
 
     """
