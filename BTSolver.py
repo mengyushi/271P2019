@@ -185,9 +185,9 @@ class BTSolver:
         dhVariable = None
         maxUnassigned = -1
         
-        for v in self.network.variables:
-            if not v.isAssigned():
-                cc = self.network.getConstraintsContainingVariable(v)
+        for var in self.network.variables:
+            if not var.isAssigned():
+                cc = self.network.getConstraintsContainingVariable(var)
                 degC = []
                 for constraint in cc:
                     varsC = constraint.vars
@@ -195,7 +195,7 @@ class BTSolver:
                         if not v2.isAssigned():
                             degC.append(v2)
                 if len(degC) > maxUnassigned:
-                    dhVariable = v
+                    dhVariable = var
                     maxUnassigned = len(degC)
                                 
         return dhVariable
@@ -211,25 +211,34 @@ class BTSolver:
 
     def MRVwithTieBreaker(self):
         temp = self.getfirstUnassignedVariable()
+
+        if not temp:
+            return []
+
         res = [temp]
 
         for v in self.network.getVariables():
-            if (v.isAssigned() == False and v.size() < temp.size()):
-                temp = v
-                res = [temp]
-            elif (v.isAssigned() == False and v.size() == temp.size()):
-                neighborsOfV = self.network.getNeighborsOfVariable(v)
-                degreeOfV = sum([1 for i in neighborsOfV if not i.isAssigned()])
-                neighborsOftemp = self.network.getNeighborsOfVariable(v)
-                degreeOftemp = sum([1 for i in neighborsOftemp if not i.isAssigned()])
-
-                if (degreeOfV > degreeOftemp):
+            if v.isAssigned() == False:
+                if v.size() < temp.size():
+                    # new smallest domain
                     temp = v
                     res = [temp]
-                elif (degreeOfV == degreeOftemp):
-                    res.append(v)
+                elif v.size() == temp.size():
+                    neighborsOfV = self.network.getNeighborsOfVariable(v)
+                    degreeOfV = sum([1 for i in neighborsOfV if not i.isAssigned()])
+                    neighborsOftemp = self.network.getNeighborsOfVariable(v)
+                    degreeOftemp = sum([1 for i in neighborsOftemp if not i.isAssigned()])
+
+                    if (degreeOfV > degreeOftemp):
+                        # update new max affecting neis
+                        temp = v
+                        res = [temp]
+                    elif (degreeOfV == degreeOftemp):
+                        res.append(v)
 
         return res
+
+
 
     # test_MAD92 (test_MAD.Test_MAD) (0.0/1.0)
     # Test Failed: (1, 6) not found in [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)] : Variable returned is incorrect. Returned (1, 6). Should be [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)].
