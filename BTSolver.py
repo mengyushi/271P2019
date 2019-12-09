@@ -210,39 +210,37 @@ class BTSolver:
 
 
     def MRVwithTieBreaker(self):
-        temp = self.getfirstUnassignedVariable()
 
-        if not temp:
-            return []
+        def cal_degree ( variable ):
+            deg = 0
+            for v in self.network.getNeighborsOfVariable(variable):
+                if not v.isAssigned():
+                    deg += 1
+            return deg
+        
+        MRV = None
+        res = []
+        
+        min_domain = float('inf')
+        max_degree = -float('inf')
 
-        res = [temp]
-
-        for v in self.network.getVariables():
-            if v.isAssigned() == False:
-                if v.size() < temp.size():
-                    # new smallest domain
-                    temp = v
-                    res = [temp]
-                elif v.size() == temp.size():
-                    neighborsOfV = self.network.getNeighborsOfVariable(v)
-                    degreeOfV = sum([1 for i in neighborsOfV if not i.isAssigned()])
-                    neighborsOftemp = self.network.getNeighborsOfVariable(v)
-                    degreeOftemp = sum([1 for i in neighborsOftemp if not i.isAssigned()])
-
-                    if (degreeOfV > degreeOftemp):
-                        # update new max affecting neis
-                        temp = v
-                        res = [temp]
-                    elif (degreeOfV == degreeOftemp):
-                        res.append(v)
+        for v in self.network.variables:
+            if not v.isAssigned():
+                if MRV == None:
+                    MRV = v
+                    res = [MRV]
+                else:
+                    if v.getDomain().size() < MRV.getDomain().size():
+                        MRV = v
+                        res = [MRV]
+                    elif v.getDomain().size() == MRV.getDomain().size():
+                        if cal_degree(v) == cal_degree(MRV):
+                            res.append(v)
+                        elif cal_degree(v) > cal_degree(MRV):
+                            MRV = v
+                            res = [MRV]
 
         return res
-
-
-
-    # test_MAD92 (test_MAD.Test_MAD) (0.0/1.0)
-    # Test Failed: (1, 6) not found in [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)] : Variable returned is incorrect. Returned (1, 6). Should be [(2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 2)].
-
 
     """
          Optional TODO: Implement your own advanced Variable Heuristic
